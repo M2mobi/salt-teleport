@@ -161,7 +161,7 @@ def nodes_list(failhard=True, ignore_retcode=False, redirect_stderr=False, debug
         if debug:
             result['debug'] = cmd_result
 
-        node_regex = re.compile('^([a-z\s]+)     (.*)     (.*)     (.*)$')
+        node_regex = re.compile('^([A-Za-z\.0-9]+)\s*([a-f0-9\-]*)\s*([0-9\.\:]*)\s*([a-z\=,]*)$')
             
         for line in cmd_result['stdout'].splitlines():
             parts = line.split('\t')
@@ -214,7 +214,7 @@ def tokens_list(failhard=True, ignore_retcode=False, redirect_stderr=False, debu
         if debug:
             result['debug'] = cmd_result
 
-        node_regex = re.compile('^([0-9a-f]{32})     (.*)     (.*)$')
+        node_regex = re.compile('^([0-9a-f]{32})\s*([A-Za-z]*)\s*([0-9]{2}\ [A-Za-z]{3}\ [0-9]{2}\ [0-9\:]{5}\ .*)$')
             
         for line in cmd_result['stdout'].splitlines():
             parts = line.split('\t')
@@ -361,7 +361,7 @@ def users_list(failhard=True, ignore_retcode=False, redirect_stderr=False, debug
         if debug:
             result['debug'] = cmd_result
 
-        user_regex = re.compile('^(.*)     (.*)$')
+        user_regex = re.compile('^([\w]*)\s([a-z]*)$')
             
         for line in cmd_result['stdout'].splitlines():
             parts = line.split('\t')
@@ -400,7 +400,7 @@ def users_exists(login):
     return False
 
 
-def node_authentication_token(tgt='*', roles='node', ttl='2m', expr_form='glob'):
+def node_authentication_token(tgt='*', roles='node', ttl='2m', tgt_type='glob'):
     '''
     Get Teleport Node Authentication Token
 
@@ -432,7 +432,7 @@ def node_authentication_token(tgt='*', roles='node', ttl='2m', expr_form='glob')
 
     if authenticated == False:
         args = ['roles={0}'.format(roles), 'ttl={0}'.format(ttl)]
-        authentication_token = __salt__['publish.publish'](tgt, 'teleport.nodes_add', arg=args, expr_form=expr_form).values().pop()
+        authentication_token = __salt__['publish.publish'](tgt, 'teleport.nodes_add', arg=args, tgt_type=tgt_type).values().pop()
 
         log.debug('authentication_token: {0}'.format(authentication_token))
 

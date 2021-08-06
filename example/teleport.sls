@@ -4,7 +4,7 @@ teleport-config:
     - template: jinja
     - source: salt://config.tmpl
     - defaults:
-        token: {{ salt['teleport.node_authentication_token']('role:teleport-auth', expr_form='grain') }}
+        token: {{ salt['teleport.node_authentication_token']('role:teleport-auth', tgt_type='grain') }}
 
 teleport-service:
   service.running:
