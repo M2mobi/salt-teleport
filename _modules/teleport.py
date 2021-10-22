@@ -96,7 +96,7 @@ def nodes_add(roles="node", ttl="2m", failhard=True, ignore_retcode=False, redir
         if debug:
             result['debug'] = cmd_result
 
-        token_regex  = re.compile(r'^The invite token: ([0-9a-f]{32})$')
+        token_regex  = re.compile(r'^The invite token: ([0-9a-f]{32})\.?$')
         expire_regex = re.compile(r'^  - This invitation token will expire in ([0-9]+) (.*)$')
         cmd_regex    = re.compile(r'^> (.*)$')
         auth_regex   = re.compile(r'.*--auth-server\=(.*)$')
