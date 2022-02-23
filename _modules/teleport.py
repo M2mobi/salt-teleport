@@ -237,28 +237,34 @@ def tokens_list(failhard=True, ignore_retcode=False, redirect_stderr=False, debu
         return cmd_result
 
 def clusters_add(labels="", ttl="2m", failhard=True, ignore_retcode=False, redirect_stderr=False, debug=False, **kwargs):
+    return tokens_add(labels=labels, type="trusted_cluster", ttl=ttl, failhard=failhard, ignore_retcode=ignore_retcode, redirect_stderr=redirect_stderr, debug=debug, kwargs=kwargs)
+
+def databases_add(labels="", ttl="2m", failhard=True, ignore_retcode=False, redirect_stderr=False, debug=False, **kwargs):
+    return tokens_add(labels=labels, type="db", ttl=ttl, failhard=failhard, ignore_retcode=ignore_retcode, redirect_stderr=redirect_stderr, debug=debug, kwargs=kwargs)
+
+def tokens_add(type, labels="", ttl="2m", failhard=True, ignore_retcode=False, redirect_stderr=False, debug=False, **kwargs):
     '''
-    Add Teleport Cluster
+    Add Teleport tokens
 
     labels
-        The teleport labels to be assigned when the cluster token is generated
+        The teleport labels to be assigned when the token is generated
 
     ttl
-        The time to live for the cluster token
+        The time to live for the token
 
     CLI Example:
 
     .. code-block:: bash
 
-        salt '*' teleport.cluster_add
+        salt '*' teleport.tokens_add type="db"
     
     .. code-block:: bash
     
-        salt '*' teleport.cluster_add labels="" ttl="20m"
+        salt '*' teleport.tokens_add labels="env=test" ttl="20m" type="db"
     '''
-    log.debug('tctl tokens add --type=trusted_cluster --labels=\"{0}\" --ttl={1}'.format(labels, ttl))
+    log.debug('tctl tokens add --type={0} --labels=\"{1}\" --ttl={2}'.format(type, labels, ttl))
 
-    command = "tctl tokens add --type=trusted_cluster --labels=\"{0}\" --ttl={1}".format(labels, ttl)
+    command = "tctl tokens add --type={0} --labels=\"{1}\" --ttl={2}".format(type, labels, ttl)
 
     cmd_result = __salt__['cmd.run_all'](
         command,
@@ -275,7 +281,7 @@ def clusters_add(labels="", ttl="2m", failhard=True, ignore_retcode=False, redir
         if debug:
             result['debug'] = cmd_result
 
-        token_regex  = re.compile(r'^The cluster invite token: ([0-9a-f]{32})\.?$')
+        token_regex  = re.compile(r'^The [\S]+ invite token: ([0-9a-f]{32})\.?$')
         expire_regex = re.compile(r'^This token will expire in ([0-9]+) (.*)$')
         
         for line in cmd_result['stdout'].splitlines():
