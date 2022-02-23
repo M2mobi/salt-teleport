@@ -281,12 +281,16 @@ def tokens_add(type, labels="", ttl="2m", failhard=True, ignore_retcode=False, r
         if debug:
             result['debug'] = cmd_result
 
-        token_regex  = re.compile(r'^The [\S]+ invite token: ([0-9a-f]{32})\.?$')
+        token_regex  = re.compile(r'^The [\S]* ?invite token: ([0-9a-f]{32})\.?$')
         expire_regex = re.compile(r'^This token will expire in ([0-9]+) (.*)$')
+        cmd_regex    = re.compile(r'^> (.*)$')
+        auth_regex   = re.compile(r'.*--auth-server\=(.*)$')
         
         for line in cmd_result['stdout'].splitlines():
             token_match  = token_regex.match(line)
             expire_match = expire_regex.match(line)
+            cmd_match    = cmd_regex.match(line)
+            auth_match   = auth_regex.match(line)
 
             if token_match:
                 result['token'] = token_match.group(1)
@@ -298,6 +302,10 @@ def tokens_add(type, labels="", ttl="2m", failhard=True, ignore_retcode=False, r
                 elif expire_match.group(2) == 'hours':
                     time_to_add = int(expire_match.group(1)) * 60 * 60
                 result['expires_at'] = int(time.time()) + time_to_add
+            if cmd_match:
+                result['command'] = cmd_match.group(1)
+            if auth_match:
+                result['auth_server'] = auth_match.group(1)
 
         return result
     else:
