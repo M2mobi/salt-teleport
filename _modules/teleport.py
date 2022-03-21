@@ -358,7 +358,7 @@ def tokens_rm(token, failhard=True, ignore_retcode=False, redirect_stderr=False,
         cmd_result['result'] = False
         return cmd_result
 
-def sign(format, hosts="localhost", ttl="90d", failhard=True, ignore_retcode=False, redirect_stderr=False, debug=False, **kwargs):
+def sign(format, hosts, ttl="90d", failhard=True, ignore_retcode=False, redirect_stderr=False, debug=False, **kwargs):
     '''
     Create teleport certificates
 
@@ -372,16 +372,16 @@ def sign(format, hosts="localhost", ttl="90d", failhard=True, ignore_retcode=Fal
 
     .. code-block:: bash
 
-        salt '*' teleport.sign format="db"
+        salt '*' teleport.sign format="db" hosts="localhost,127.0.0.1"
     
     .. code-block:: bash
     
-        salt '*' teleport.sign hosts="localhost,127.0.0.1" ttl="180d" format="db"
+        salt '*' teleport.sign format="db" hosts="localhost,127.0.0.1" ttl="180d" 
     '''
     out = "salt-" + hosts.split(',')[0]
-    log.debug('tctl auth sign --out={0} --format={1} --host={2} --ttl={3}'.format(out, format, hosts, ttl))
+    log.debug('tctl auth sign --out={0} --format={1} --host={2} --ttl={3} --overwrite'.format(out, format, hosts, ttl))
 
-    command = "tctl auth sign --out={0} --format={1} --host={2} --ttl={3}".format(out, format, hosts, ttl)
+    command = "tctl auth sign --out={0} --format={1} --host={2} --ttl={3} --overwrite".format(out, format, hosts, ttl)
 
     cmd_result = __salt__['cmd.run_all'](
         command,
@@ -398,10 +398,17 @@ def sign(format, hosts="localhost", ttl="90d", failhard=True, ignore_retcode=Fal
         if debug:
             result['debug'] = cmd_result
 
-        for ext in ["key", "cas", "crt"]:
-            cmd_result = __salt__['cmd.run_all']("cat {0}.{1}".format(out, ext), cwd="/root", runas="root", python_shell=False)
+        extensions = {
+            "key": ".key",
+            "cas": ".cas",
+            "crt": ".crt",
+            "private_key": "",
+            "public_key": "-cert.pub"
+        }
+        for name,ext in extensions.items():
+            cmd_result = __salt__['cmd.run_all']("cat {0}{1}".format(out, ext), cwd="/root", runas="root", python_shell=False)
             if cmd_result['retcode'] == 0:
-                result[ext] = cmd_result['stdout']
+                result[name] = cmd_result['stdout']
         
         return result
     else:
