@@ -286,10 +286,13 @@ def tokens_add(type, labels="", ttl="2m", failhard=True, ignore_retcode=False, r
         cmd_regex    = re.compile(r'> ([a-z0-9\s\-\\\=\:\.]*)\n')
         auth_regex   = re.compile(r'.*--auth-server\=([a-z0-9\.\:]*) \\$')
         
+        cmd_match    = cmd_regex.match(cmd_result['stdout'])
+        if cmd_match:
+            result['command'] = cmd_match.group(1)
+
         for line in cmd_result['stdout'].splitlines():
             token_match  = token_regex.match(line)
             expire_match = expire_regex.match(line)
-            cmd_match    = cmd_regex.match(line)
             auth_match   = auth_regex.match(line)
 
             if token_match:
@@ -302,8 +305,6 @@ def tokens_add(type, labels="", ttl="2m", failhard=True, ignore_retcode=False, r
                 elif expire_match.group(2) == 'hours':
                     time_to_add = int(expire_match.group(1)) * 60 * 60
                 result['expires_at'] = int(time.time()) + time_to_add
-            if cmd_match:
-                result['command'] = cmd_match.group(1)
             if auth_match:
                 result['auth_server'] = auth_match.group(1)
 
@@ -355,6 +356,61 @@ def tokens_rm(token, failhard=True, ignore_retcode=False, redirect_stderr=False,
                 msg += ': {0}'.format(err)
             raise salt.exceptions.CommandExecutionError(msg)
         cmd_result['result'] = False
+        return cmd_result
+
+def sign(format, hosts="localhost", ttl="90d", failhard=True, ignore_retcode=False, redirect_stderr=False, debug=False, **kwargs):
+    '''
+    Create teleport certificates
+
+    labels
+        The teleport labels to be assigned when the token is generated
+
+    ttl
+        The time to live for the token
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' teleport.sign format="db"
+    
+    .. code-block:: bash
+    
+        salt '*' teleport.sign hosts="localhost,127.0.0.1" ttl="180d" format="db"
+    '''
+    out = "salt-" + hosts.split(',')[0]
+    log.debug('tctl auth sign --out={0} --format={1} --host={2} --ttl={3}'.format(out, format, hosts, ttl))
+
+    command = "tctl auth sign --out={0} --format={1} --host={2} --ttl={3}".format(out, format, hosts, ttl)
+
+    cmd_result = __salt__['cmd.run_all'](
+        command,
+        cwd="/root",
+        runas="root",
+        python_shell=False,
+        ignore_retcode=ignore_retcode,
+        redirect_stderr=redirect_stderr,
+        **kwargs)
+
+    if cmd_result['retcode'] == 0:
+        result = {}
+
+        if debug:
+            result['debug'] = cmd_result
+
+        for ext in ["key", "cas", "crt"]:
+            cmd_result = __salt__['cmd.run_all']("cat {0}.{1}".format(out, ext), cwd="/root", runas="root", python_shell=False)
+            if cmd_result['retcode'] == 0:
+                result[ext] = cmd_result['stdout']
+        
+        return result
+    else:
+        if failhard:
+            msg = "Command '{0}' failed".format(command)
+            err = cmd_result['stdout' if redirect_stderr else 'stderr']
+            if err:
+                msg += ': {0}'.format(err)
+            raise salt.exceptions.CommandExecutionError(msg)
         return cmd_result
 
 def users_add(login, local_logins=None, failhard=True, ignore_retcode=False, redirect_stderr=False, debug=False, **kwargs):
