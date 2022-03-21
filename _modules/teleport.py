@@ -282,9 +282,9 @@ def tokens_add(type, labels="", ttl="2m", failhard=True, ignore_retcode=False, r
             result['debug'] = cmd_result
 
         token_regex  = re.compile(r'^The [\S]* ?invite token: ([0-9a-f]{32})\.?$')
-        expire_regex = re.compile(r'^This token will expire in ([0-9]+) (.*)$')
-        cmd_regex    = re.compile(r'^> (.*)$')
-        auth_regex   = re.compile(r'.*--auth-server\=(.*)$')
+        expire_regex = re.compile(r'^This token will expire in ([0-9]+) (\w*)\.?$')
+        cmd_regex    = re.compile(r'> ([a-z0-9\s\-\\\=\:\.]*)\n')
+        auth_regex   = re.compile(r'.*--auth-server\=([a-z0-9\.\:]*) \\$')
         
         for line in cmd_result['stdout'].splitlines():
             token_match  = token_regex.match(line)
