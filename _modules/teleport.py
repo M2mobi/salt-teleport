@@ -406,9 +406,11 @@ def sign(format, hosts, ttl="90d", failhard=True, ignore_retcode=False, redirect
             "public_key": "-cert.pub"
         }
         for name,ext in extensions.items():
-            cmd_result = __salt__['cmd.run_all']("cat {0}{1}".format(out, ext), cwd="/root", runas="root", python_shell=False)
+            cmd_result = __salt__['cmd.run_all']("cat {0}{1}".format(out, ext), cwd="/root", runas="root", python_shell=False, ignore_retcode=True)
             if cmd_result['retcode'] == 0:
                 result[name] = cmd_result['stdout']
+            else:
+                result[name] = None
         
         return result
     else:
