@@ -568,7 +568,7 @@ def node_authentication_token(tgt='*', roles='node', ttl='2m', tgt_type='glob'):
         with salt.utils.flopen(path_auth_token, 'r+') as stream:
             return yaml.load(stream)['token']
 
-def sign_db(hosts, ttl="90d", user=None, failhard=True, ignore_retcode=False, redirect_stderr=False, debug=False, **kwargs):
+def sign_db(hosts, ttl="2190h", user=None, failhard=True, ignore_retcode=False, redirect_stderr=False, debug=False, **kwargs):
     '''
     Create teleport Database certificates
 
@@ -593,7 +593,7 @@ def sign_db(hosts, ttl="90d", user=None, failhard=True, ignore_retcode=False, re
     '''
     return sign(format='db', hosts=hosts, ttl=ttl, user=user, failhard=failhard, ignore_retcode=ignore_retcode, redirect_stderr=redirect_stderr, debug=debug, kwargs=kwargs)
 
-def sign_mongodb(hosts, ttl="90d", user=None, failhard=True, ignore_retcode=False, redirect_stderr=False, debug=False, **kwargs):
+def sign_mongodb(hosts, ttl="2190h", user=None, failhard=True, ignore_retcode=False, redirect_stderr=False, debug=False, **kwargs):
     '''
     Create teleport MongoDB certificates
 
@@ -618,7 +618,7 @@ def sign_mongodb(hosts, ttl="90d", user=None, failhard=True, ignore_retcode=Fals
     '''
     return sign(format='mongodb', hosts=hosts, ttl=ttl, user=user, failhard=failhard, ignore_retcode=ignore_retcode, redirect_stderr=redirect_stderr, debug=debug, kwargs=kwargs)
 
-def sign_cockroachdb(hosts, ttl="90d", user=None, failhard=True, ignore_retcode=False, redirect_stderr=False, debug=False, **kwargs):
+def sign_cockroachdb(hosts, ttl="2190h", user=None, failhard=True, ignore_retcode=False, redirect_stderr=False, debug=False, **kwargs):
     '''
     Create teleport CockroachDB certificates
 
@@ -643,7 +643,7 @@ def sign_cockroachdb(hosts, ttl="90d", user=None, failhard=True, ignore_retcode=
     '''
     return sign(format='cockroachdb', hosts=hosts, ttl=ttl, user=user, failhard=failhard, ignore_retcode=ignore_retcode, redirect_stderr=redirect_stderr, debug=debug, kwargs=kwargs)
 
-def sign_redis(hosts, ttl="90d", user=None, failhard=True, ignore_retcode=False, redirect_stderr=False, debug=False, **kwargs):
+def sign_redis(hosts, ttl="2190h", user=None, failhard=True, ignore_retcode=False, redirect_stderr=False, debug=False, **kwargs):
     '''
     Create teleport Redis certificates
 
@@ -668,7 +668,7 @@ def sign_redis(hosts, ttl="90d", user=None, failhard=True, ignore_retcode=False,
     '''
     return sign(format='redis', hosts=hosts, ttl=ttl, user=user, failhard=failhard, ignore_retcode=ignore_retcode, redirect_stderr=redirect_stderr, debug=debug, kwargs=kwargs)
 
-def sign_openssh(hosts, ttl="90d", user=None, failhard=True, ignore_retcode=False, redirect_stderr=False, debug=False, **kwargs):
+def sign_openssh(hosts, ttl="2190h", user=None, failhard=True, ignore_retcode=False, redirect_stderr=False, debug=False, **kwargs):
     '''
     Create teleport OpenSSH certificates
 
@@ -693,7 +693,7 @@ def sign_openssh(hosts, ttl="90d", user=None, failhard=True, ignore_retcode=Fals
     '''
     return sign(format='openssh', hosts=hosts, ttl=ttl, user=user, failhard=failhard, ignore_retcode=ignore_retcode, redirect_stderr=redirect_stderr, debug=debug, kwargs=kwargs)
 
-def sign_tls(hosts, ttl="90d", user=None, failhard=True, ignore_retcode=False, redirect_stderr=False, debug=False, **kwargs):
+def sign_tls(hosts, ttl="2190h", user=None, failhard=True, ignore_retcode=False, redirect_stderr=False, debug=False, **kwargs):
     '''
     Create teleport TLS certificates
 
@@ -718,7 +718,7 @@ def sign_tls(hosts, ttl="90d", user=None, failhard=True, ignore_retcode=False, r
     '''
     return sign(format='tls', hosts=hosts, ttl=ttl, user=user, failhard=failhard, ignore_retcode=ignore_retcode, redirect_stderr=redirect_stderr, debug=debug, kwargs=kwargs)
 
-def sign(format, hosts, ttl="90d", user=None, failhard=True, ignore_retcode=False, redirect_stderr=False, debug=False, **kwargs):
+def sign(format, hosts, ttl="2190h", user=None, failhard=True, ignore_retcode=False, redirect_stderr=False, debug=False, **kwargs):
     '''
     Create teleport certificates
 
@@ -742,7 +742,7 @@ def sign(format, hosts, ttl="90d", user=None, failhard=True, ignore_retcode=Fals
     
     .. code-block:: bash
     
-        salt '*' teleport.sign format="db" hosts="localhost,127.0.0.1" ttl="180d" user="jenkins"
+        salt '*' teleport.sign format="db" hosts="localhost,127.0.0.1" ttl="2190h" user="jenkins"
     '''
     out = "salt-" + hosts.split(',')[0]
 
