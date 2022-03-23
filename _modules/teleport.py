@@ -217,7 +217,6 @@ def tokens_list(failhard=True, ignore_retcode=False, redirect_stderr=False, debu
         node_regex = re.compile('^([0-9a-f]{32})\s*([A-Za-z]*)\s*([0-9]{2}\ [A-Za-z]{3}\ [0-9]{2}\ [0-9\:]{5}\ .*)$')
             
         for line in cmd_result['stdout'].splitlines():
-            parts = line.split('\t')
             match = node_regex.match(line)
             if match:
                 result['tokens'].append({
@@ -592,7 +591,7 @@ def sign_db(hosts, ttl="90d", user=None, failhard=True, ignore_retcode=False, re
     
         salt '*' teleport.sign_db hosts="localhost,127.0.0.1" ttl="180d" user="jenkins"
     '''
-    return sign('db', hosts, ttl, user, failhard, ignore_retcode, redirect_stderr, debug, kwargs)
+    return sign(format='db', hosts=hosts, ttl=ttl, user=user, failhard=failhard, ignore_retcode=ignore_retcode, redirect_stderr=redirect_stderr, debug=debug, kwargs=kwargs)
 
 def sign_mongodb(hosts, ttl="90d", user=None, failhard=True, ignore_retcode=False, redirect_stderr=False, debug=False, **kwargs):
     '''
@@ -617,7 +616,7 @@ def sign_mongodb(hosts, ttl="90d", user=None, failhard=True, ignore_retcode=Fals
     
         salt '*' teleport.sign_mongodb hosts="localhost,127.0.0.1" ttl="180d" user="jenkins"
     '''
-    return sign('mongodb', hosts, ttl, user, failhard, ignore_retcode, redirect_stderr, debug, kwargs)
+    return sign(format='mongodb', hosts=hosts, ttl=ttl, user=user, failhard=failhard, ignore_retcode=ignore_retcode, redirect_stderr=redirect_stderr, debug=debug, kwargs=kwargs)
 
 def sign_cockroachdb(hosts, ttl="90d", user=None, failhard=True, ignore_retcode=False, redirect_stderr=False, debug=False, **kwargs):
     '''
@@ -642,7 +641,7 @@ def sign_cockroachdb(hosts, ttl="90d", user=None, failhard=True, ignore_retcode=
     
         salt '*' teleport.sign_cockroachdb hosts="localhost,127.0.0.1" ttl="180d" user="jenkins"
     '''
-    return sign('cockroachdb', hosts, ttl, user, failhard, ignore_retcode, redirect_stderr, debug, kwargs)
+    return sign(format='cockroachdb', hosts=hosts, ttl=ttl, user=user, failhard=failhard, ignore_retcode=ignore_retcode, redirect_stderr=redirect_stderr, debug=debug, kwargs=kwargs)
 
 def sign_redis(hosts, ttl="90d", user=None, failhard=True, ignore_retcode=False, redirect_stderr=False, debug=False, **kwargs):
     '''
@@ -667,7 +666,7 @@ def sign_redis(hosts, ttl="90d", user=None, failhard=True, ignore_retcode=False,
     
         salt '*' teleport.sign_redis hosts="localhost,127.0.0.1" ttl="180d" user="jenkins"
     '''
-    return sign('redis', hosts, ttl, user, failhard, ignore_retcode, redirect_stderr, debug, kwargs)
+    return sign(format='redis', hosts=hosts, ttl=ttl, user=user, failhard=failhard, ignore_retcode=ignore_retcode, redirect_stderr=redirect_stderr, debug=debug, kwargs=kwargs)
 
 def sign_openssh(hosts, ttl="90d", user=None, failhard=True, ignore_retcode=False, redirect_stderr=False, debug=False, **kwargs):
     '''
@@ -692,7 +691,7 @@ def sign_openssh(hosts, ttl="90d", user=None, failhard=True, ignore_retcode=Fals
     
         salt '*' teleport.sign_openssh hosts="localhost,127.0.0.1" ttl="180d" user="jenkins"
     '''
-    return sign('openssl', hosts, ttl, user, failhard, ignore_retcode, redirect_stderr, debug, kwargs)
+    return sign(format='openssh', hosts=hosts, ttl=ttl, user=user, failhard=failhard, ignore_retcode=ignore_retcode, redirect_stderr=redirect_stderr, debug=debug, kwargs=kwargs)
 
 def sign_tls(hosts, ttl="90d", user=None, failhard=True, ignore_retcode=False, redirect_stderr=False, debug=False, **kwargs):
     '''
@@ -717,7 +716,7 @@ def sign_tls(hosts, ttl="90d", user=None, failhard=True, ignore_retcode=False, r
     
         salt '*' teleport.sign_tls hosts="localhost,127.0.0.1" ttl="180d" user="jenkins"
     '''
-    return sign('tls', hosts, ttl, user, failhard, ignore_retcode, redirect_stderr, debug, kwargs)
+    return sign(format='tls', hosts=hosts, ttl=ttl, user=user, failhard=failhard, ignore_retcode=ignore_retcode, redirect_stderr=redirect_stderr, debug=debug, kwargs=kwargs)
 
 def sign(format, hosts, ttl="90d", user=None, failhard=True, ignore_retcode=False, redirect_stderr=False, debug=False, **kwargs):
     '''
@@ -751,6 +750,9 @@ def sign(format, hosts, ttl="90d", user=None, failhard=True, ignore_retcode=Fals
         command = 'tctl auth sign --out={0} --format={1} --host={2} --user={3} --ttl={4} --overwrite'.format(out, format, hosts, user, ttl)
     else:
         command = 'tctl auth sign --out={0} --format={1} --host={2} --ttl={3} --overwrite'.format(out, format, hosts, ttl)
+
+    if debug:
+        command += " --debug"
 
     log.debug(command)
 
