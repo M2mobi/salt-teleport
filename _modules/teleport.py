@@ -358,70 +358,6 @@ def tokens_rm(token, failhard=True, ignore_retcode=False, redirect_stderr=False,
         cmd_result['result'] = False
         return cmd_result
 
-def sign(format, hosts, ttl="90d", failhard=True, ignore_retcode=False, redirect_stderr=False, debug=False, **kwargs):
-    '''
-    Create teleport certificates
-
-    labels
-        The teleport labels to be assigned when the token is generated
-
-    ttl
-        The time to live for the token
-
-    CLI Example:
-
-    .. code-block:: bash
-
-        salt '*' teleport.sign format="db" hosts="localhost,127.0.0.1"
-    
-    .. code-block:: bash
-    
-        salt '*' teleport.sign format="db" hosts="localhost,127.0.0.1" ttl="180d" 
-    '''
-    out = "salt-" + hosts.split(',')[0]
-    log.debug('tctl auth sign --out={0} --format={1} --host={2} --ttl={3} --overwrite'.format(out, format, hosts, ttl))
-
-    command = "tctl auth sign --out={0} --format={1} --host={2} --ttl={3} --overwrite".format(out, format, hosts, ttl)
-
-    cmd_result = __salt__['cmd.run_all'](
-        command,
-        cwd="/tmp",
-        runas="root",
-        python_shell=False,
-        ignore_retcode=ignore_retcode,
-        redirect_stderr=redirect_stderr,
-        **kwargs)
-
-    if cmd_result['retcode'] == 0:
-        result = {}
-
-        if debug:
-            result['debug'] = cmd_result
-
-        extensions = {
-            "key": ".key",
-            "cas": ".cas",
-            "crt": ".crt",
-            "private_key": "",
-            "public_key": "-cert.pub"
-        }
-        for name,ext in extensions.items():
-            cmd_result = __salt__['cmd.run_all']("cat {0}{1}".format(out, ext), cwd="/tmp", runas="root", python_shell=False, ignore_retcode=True)
-            if cmd_result['retcode'] == 0:
-                result[name] = cmd_result['stdout']
-            else:
-                result[name] = None
-        
-        return result
-    else:
-        if failhard:
-            msg = "Command '{0}' failed".format(command)
-            err = cmd_result['stdout' if redirect_stderr else 'stderr']
-            if err:
-                msg += ': {0}'.format(err)
-            raise salt.exceptions.CommandExecutionError(msg)
-        return cmd_result
-
 def users_add(login, local_logins=None, failhard=True, ignore_retcode=False, redirect_stderr=False, debug=False, **kwargs):
     '''
     Add Teleport User
@@ -632,3 +568,227 @@ def node_authentication_token(tgt='*', roles='node', ttl='2m', tgt_type='glob'):
     else:
         with salt.utils.flopen(path_auth_token, 'r+') as stream:
             return yaml.load(stream)['token']
+
+def sign_db(hosts, ttl="90d", user=None, failhard=True, ignore_retcode=False, redirect_stderr=False, debug=False, **kwargs):
+    '''
+    Create teleport Database certificates
+
+    hosts
+        Applicable hosts for the certificate
+
+    ttl
+        The time to live for the token
+
+    user
+        Applicable user for the certificate
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' teleport.sign_db hosts="localhost,127.0.0.1"
+    
+    .. code-block:: bash
+    
+        salt '*' teleport.sign_db hosts="localhost,127.0.0.1" ttl="180d" user="jenkins"
+    '''
+    return sign('db', hosts, ttl, user, failhard, ignore_retcode, redirect_stderr, debug, kwargs)
+
+def sign_mongodb(hosts, ttl="90d", user=None, failhard=True, ignore_retcode=False, redirect_stderr=False, debug=False, **kwargs):
+    '''
+    Create teleport MongoDB certificates
+
+    hosts
+        Applicable hosts for the certificate
+
+    ttl
+        The time to live for the token
+
+    user
+        Applicable user for the certificate
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' teleport.sign_mongodb hosts="localhost,127.0.0.1"
+    
+    .. code-block:: bash
+    
+        salt '*' teleport.sign_mongodb hosts="localhost,127.0.0.1" ttl="180d" user="jenkins"
+    '''
+    return sign('mongodb', hosts, ttl, user, failhard, ignore_retcode, redirect_stderr, debug, kwargs)
+
+def sign_cockroachdb(hosts, ttl="90d", user=None, failhard=True, ignore_retcode=False, redirect_stderr=False, debug=False, **kwargs):
+    '''
+    Create teleport CockroachDB certificates
+
+    hosts
+        Applicable hosts for the certificate
+
+    ttl
+        The time to live for the token
+
+    user
+        Applicable user for the certificate
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' teleport.sign_cockroachdb hosts="localhost,127.0.0.1"
+    
+    .. code-block:: bash
+    
+        salt '*' teleport.sign_cockroachdb hosts="localhost,127.0.0.1" ttl="180d" user="jenkins"
+    '''
+    return sign('cockroachdb', hosts, ttl, user, failhard, ignore_retcode, redirect_stderr, debug, kwargs)
+
+def sign_redis(hosts, ttl="90d", user=None, failhard=True, ignore_retcode=False, redirect_stderr=False, debug=False, **kwargs):
+    '''
+    Create teleport Redis certificates
+
+    hosts
+        Applicable hosts for the certificate
+
+    ttl
+        The time to live for the token
+
+    user
+        Applicable user for the certificate
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' teleport.sign_redis hosts="localhost,127.0.0.1"
+    
+    .. code-block:: bash
+    
+        salt '*' teleport.sign_redis hosts="localhost,127.0.0.1" ttl="180d" user="jenkins"
+    '''
+    return sign('redis', hosts, ttl, user, failhard, ignore_retcode, redirect_stderr, debug, kwargs)
+
+def sign_openssh(hosts, ttl="90d", user=None, failhard=True, ignore_retcode=False, redirect_stderr=False, debug=False, **kwargs):
+    '''
+    Create teleport OpenSSH certificates
+
+    hosts
+        Applicable hosts for the certificate
+
+    ttl
+        The time to live for the token
+
+    user
+        Applicable user for the certificate
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' teleport.sign_openssh hosts="localhost,127.0.0.1"
+    
+    .. code-block:: bash
+    
+        salt '*' teleport.sign_openssh hosts="localhost,127.0.0.1" ttl="180d" user="jenkins"
+    '''
+    return sign('openssl', hosts, ttl, user, failhard, ignore_retcode, redirect_stderr, debug, kwargs)
+
+def sign_tls(hosts, ttl="90d", user=None, failhard=True, ignore_retcode=False, redirect_stderr=False, debug=False, **kwargs):
+    '''
+    Create teleport TLS certificates
+
+    hosts
+        Applicable hosts for the certificate
+
+    ttl
+        The time to live for the token
+
+    user
+        Applicable user for the certificate
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' teleport.sign_tls hosts="localhost,127.0.0.1"
+    
+    .. code-block:: bash
+    
+        salt '*' teleport.sign_tls hosts="localhost,127.0.0.1" ttl="180d" user="jenkins"
+    '''
+    return sign('tls', hosts, ttl, user, failhard, ignore_retcode, redirect_stderr, debug, kwargs)
+
+def sign(format, hosts, ttl="90d", user=None, failhard=True, ignore_retcode=False, redirect_stderr=False, debug=False, **kwargs):
+    '''
+    Create teleport certificates
+
+    format
+        The certificate format
+
+    hosts
+        Applicable hosts for the certificate
+
+    ttl
+        The time to live for the token
+
+    user
+        Applicable user for the certificate
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' teleport.sign format="db" hosts="localhost,127.0.0.1"
+    
+    .. code-block:: bash
+    
+        salt '*' teleport.sign format="db" hosts="localhost,127.0.0.1" ttl="180d" user="jenkins"
+    '''
+    out = "salt-" + hosts.split(',')[0]
+
+    if user != None:
+        command = 'tctl auth sign --out={0} --format={1} --host={2} --user={3} --ttl={4} --overwrite'.format(out, format, hosts, user, ttl)
+    else:
+        command = 'tctl auth sign --out={0} --format={1} --host={2} --ttl={3} --overwrite'.format(out, format, hosts, ttl)
+
+    log.debug(command)
+
+    cmd_result = __salt__['cmd.run_all'](
+        command,
+        cwd="/tmp",
+        runas="root",
+        python_shell=False,
+        ignore_retcode=ignore_retcode,
+        redirect_stderr=redirect_stderr,
+        **kwargs)
+
+    if cmd_result['retcode'] == 0:
+        result = {}
+
+        if debug:
+            result['debug'] = cmd_result
+
+        extensions = {
+            "key": ".key",
+            "cas": ".cas",
+            "crt": ".crt",
+            "private_key": "",
+            "public_key": "-cert.pub"
+        }
+        for name,ext in extensions.items():
+            cmd_result = __salt__['cmd.run_all']("cat {0}{1}".format(out, ext), cwd="/tmp", runas="root", python_shell=False, ignore_retcode=True)
+            if cmd_result['retcode'] == 0:
+                result[name] = cmd_result['stdout']
+            else:
+                result[name] = None
+        
+        return result
+    else:
+        if failhard:
+            msg = "Command '{0}' failed".format(command)
+            err = cmd_result['stdout' if redirect_stderr else 'stderr']
+            if err:
+                msg += ': {0}'.format(err)
+            raise salt.exceptions.CommandExecutionError(msg)
+        return cmd_result
